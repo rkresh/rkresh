@@ -1,0 +1,29 @@
+Part 1. Data Analysis using PySpark [max 120 pt]
+
+In this assignment, we are going to use PySpark to analyse the GPS trajectory dataset that was collected in the Geolife project (Microsoft Research Asia) over a period of five years by 100+ people. Each GPS trajectory in this dataset is represented by a sequence of time-stamped points, each of which contains the information of latitude, longitude and altitude.
+
+The first line of this file contains a header:
+UserID,Latitude,Longitude,AllZero,Altitude,Timestamp,Date,Time which is self-explanatory (you can ignore the 0s in the AllZero column). The Timestamp is the number of days (with fractional part) that have passed since 12/30/1899. You should process this data as a RDD or Spark’s DataFrame.
+
+To simplify matters you can interpret (longitude, latitude) as a (x,y) point in 2D space and calculate the distance between two such points using the standard Euclidean distance. However, to be accurate, you should use one of the solutions presented here to calculate this distance (pick any that works for you and make sure it calculates the distance correctly based on some test example)
+https://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude (Links to an external site.)
+
+Now run Spark in the VirtualBox image that you made, the image available on CAVNAS or simply your own OS if you were able to install and run Spark on it. Either way, make sure to backup your solution as often as possible. Please run Spark in the Standalone cluster mode with the number of workers set to the number of cores that your VM / laptop / remote machine have. Most of the individual tasks are independent from each other, so you can get points without solving all of them. In each task, provide the PySpark code with some explanation and the result. (No other programming language or framework other than PySpark is permitted.) In case of a tie for the value of the particular measure, give preference to users with smaller ID value.
+
+Any data analysis starts with data cleaning (in fact this typically takes most of the time). In this case, we should convert all dates/times from GMT to Beijing time, where essentially all these trajectories were collected. This requires to move dates, times and timestamps by 8 hours ahead. You should not create a new input file, but instead use Spark’s map/withColumn transformation to change the RDD/DataFrame created from the original file. [20 pt] (If you find this too difficult, just skip to the next point and say so in your report. You will just simply miss out on the points for this task as a result.)
+Calculate for each person, on how many days was the data recorded for them (count any day with at least one data point). Output the top 5 user IDs according to this measure and its value (as mentioned above, in case of a tie, output the user with the smaller ID). [20 pt]
+Calculate for each person, on how many days there were more than 100 data points recorded for them (count any day with at least 100 data points). Output all user IDs and the corresponding value of this measure. [20 pt]
+Calculate for each person, the highest altitude that they reached. Output the top 5 user ID according to this measure, its value and the day that was achieved (in case of a tie, output the earliest such a day). [20 pt]
+Calculate for each person, the timespan of the observation, i.e., the difference between the highest timestamp of his/her observation and the lowest one. Output the top 5 user ID according to this measure and its value. [20 pt]
+Calculate for each person, the distance travelled by them each day. For each user output the (earliest) day they travelled the most. Also, output the total distance travelled by all users on all days. HINT: use lag and window functions. [20 pt]
+
+
+Part 2. Clustering of Trajectories [max 80 pt]
+
+In this part we are going to work with the same data set, but not with PySpark. In fact, you should not write any code in any programming languages in this part.
+
+Suppose that we would like to figure how many different daily travel patterns people have. To do so we should first quantify by how much any two given trajectories differ and use a suitable clustering algorithm after that.
+
+Consider for each user the attached dataset consisting of day trajectories (a list of (timestamp, longitude, latitude)) for individual users. Design a suitable dissimilarity measure that can quantify how different two day trajectories are from each other. Your measure should be symmetric (i.e., d(x,y) = d(y,x) for any trajectories x,y) and if and only when two trajectories are the same its value should be 0 (i.e., d(x,y) = 0 if and only if x=y). Argue (or prove if you like) why this measure has these properties, is suitable for this task and robust to errors in the data (e.g., duplicated timepoints, adding timepoints in the middle that do not really change the trajectory). [50 pt]. NOTE: Make sure this measure allows for a different number of observations made each day. For half a number of points (i.e., [25 pt]), you can assume that the number of observations and their timestamps are the same.
+Is your measure is a distance metric, i.e., satisfies the triangle equality (d(x,y) <= d(x,z) + d(z,y) for any trajectories x,y,z). If so argue (or prove if you like) why and if not, show a counterexample. [10 points]
+For each given user we would like to group days that have similar trajectories. Which of the clustering algorithms presented during the lectures would you choose in this case and why? [20 points]
