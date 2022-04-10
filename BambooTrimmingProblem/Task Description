@@ -1,0 +1,13 @@
+To offset the long hours of sitting in classes, you are a passionate gardener, and your pride and joy is your little forest of exotic bamboos. However, being one of the fastest-growing plants on earth, the bamboo plot requires constant attention. In an attempt to keep the effort manageable, you decide to cut down exactly one of your the bamboo plants each day, and you cut it right back to the roots.
+
+Since your bamboos have vastly different growth rates, some of them need more frequent cutting than others. You set out to find a periodic schedule of which bamboo to cut each day, so as to minimize the maximal height of your garden.
+
+Formalization
+You decide to mathematically model the task as follows. Given n bamboos with daily growth rates g1,…,gn, we assume that after growing for t days (without cutting), bamboo i will have height t⋅gi. Right after you cut a bamboo, its height is 0, and so is the initial height of all bamboos at the beginning.
+
+Writing hi(t) for the height of bamboo i after t days, and c(t) the bamboo that you cut on day t.
+The task is to find an infinite schedule of cuts c:ℕ0→[n] that keeps the maximal height supt∈ℕmaxi∈[n]hi(t) as low as possible.
+
+To simplify your planning, you decide to restrict your attention to periodic schedules: You specify a fixed, finite list C of cuts to execute, and when you are done with this list, you simply start from the beginning again, and repeat this process indefinitely.
+
+Task Decsrition can also be found: https://www.wild-inter.net/teaching/comp526/bamboo
