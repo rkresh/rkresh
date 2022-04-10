@@ -1,0 +1,23 @@
+1) [2 points] Unzip stock_data.zip, which contains historical market data for stocks in the S&P 500 index. The S&P 500 is a stock market index tracking the performance of 500 large companies listed on stock exchanges in the United States.
+Load the data into a pandas dataframe. It should have 7 columns: 
+1.	Date: the date for a given set of observations
+2.	Open: the price of a given stock on a given date, at opening time on the relevant stock exchange
+3.	High: the highest price reached by a given stock on a given date
+4.	Low: the lowest price reached by a given stock on a given date
+5.	Close: the price of a given stock on a given date, at closing time on the relevant stock exchange
+6.	Volume: the total volume traded for a given stock on a given date
+7.	Name: The stock name
+This assignment will use the date, close and name columns.
+2) [3 points] Identify the set of all names in the data, and sort these names in alphabetical order. How many are there? List the first and last 5 names.
+3) [5 points] Filter out all names for which the first date is after 1st Jan 2014 or the last date is before 31st Dec 2017. Which names were removed? How many are left?
+Hint: After filtering out the above names, you should be left with all of the names which have market data for at least the 4 year period 2014 – 2017. You should have removed a small number of names: these are stocks which started trading after 1st Jan 2014 or ceased trading before 31st Dec 2017. You should be left with close to 500 names. Use these 500-ish names for the rest of the assignment. The names you removed will not be used again, because they don’t have sufficient market data.
+4) [5 points] Identify the set of dates that are common to all the remaining names. Remove all the dates that are before 1st Jan 2014 or after 31st Dec 2017. How many dates are there? What are the first and last 5 dates?
+Hint: There are approximately 5 * 50 = 250 trading days in a year, and the period 1st Jan 2014 to 31st Dec 2017 spans 4 years. So, you should be left with approximately 250 * 4 = 1,000 dates. The first 5 dates should be close to (but not before) 1st Jan 2014. The last 5 dates should be close to (but not after) 31st Dec 2017. 
+5) [5 points] Build a new pandas dataframe which has a column for each of the names from step (3) and a row for each of the dates from step (4). The dataframe should contain the “close” values for each corresponding name and date. 
+6) [5 points] Create another dataframe containing returns calculated as: 
+return(name, date) = (close(name, date) - close(name, previous date)) / close(name, previous date)
+Note that this dataframe should have one less row than the dataframe from step (5), because you can’t calculate returns for the first date (there’s no previous date). 
+7) [15 points] Use the class sklearn.decomposition.PCA to calculate the principal components of the returns from step (6).  
+8) [20 points] For the principal components calculated in step (7), extract the explained variance ratios (you can get these from the PCA object). What percentage of variance is explained by the first principal component? Plot the first 20 explained variance ratios. Identify an elbow and mark it on the plot. List your code for this question and provide a 1 paragraph description of it.
+9) [20 points] Calculate the cumulative variance ratios using numpy.cumsum on the list of explained variance ratios from step (8). Plot all these cumulative variance ratios (x axis = principal component, y axis = cumulative variance ratio). Mark on your plot the principal component for which the cumulative variance ratio is greater than or equal to 95%.
+10) [20 points] Normalise your dataframe from step (6) so that the columns have zero mean and unit variance. Repeat steps (7) - (9) for this new dataframe.
