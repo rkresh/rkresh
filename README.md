@@ -1,10 +1,3 @@
-- 👋 Hi, I’m @rkresh
-- 👀 I’m interested in learning about Machine Learning, Artificial Intelligence and Data Analytics
-- 🌱 I’m currently pursuing my master's in Big Data and High Performance Computing from the Univrsity of Liverpool
-- 💞️ I’m looking to collaborate with organisations where I can add value to, and at the same learn more about data and enhance the skills I posses
-- 📫 How to reach me https://www.linkedin.com/in/reshma-kuriachan/
+To offset the long hours of sitting in classes, you are a passionate gardener, and your pride and joy is your little forest of exotic bamboos. However, being one of the fastest-growing plants on earth, the bamboo plot requires constant attention. In an attempt to keep the effort manageable, you decide to cut down exactly one of your the bamboo plants each day, and you cut it right back to the roots.
 
-<!---
-rkresh/rkresh is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
-You can click the Preview link to take a look at your changes.
---->
+Since your bamboos have vastly different growth rates, some of them need more frequent cutting than others. You set out to find a periodic schedule of which bamboo to cut each day, so as to minimize the maximal height of your garden.
