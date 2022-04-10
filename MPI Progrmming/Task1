@@ -1,0 +1,101 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<omp.h>
+
+#define N 1024
+#define LIMIT 100000
+#define tem 200
+#define f_x 0.5
+#define f_y 0.5
+
+void print_domain(double domain[N+1][N+1]) {
+    int step = floor(N/8), i, j;
+    printf("*******************************************************\n");
+    for (i = 1; i <= N; i+=step) {
+        for (j = 1; j <= N; j+=step)
+            printf("%f ", domain[i][j]);
+        printf("\n");
+    }
+    printf("*******************************************************\n\n\n");
+}
+
+double get_final_temperature(double radtemp, double fracx, double fracy) {
+//printf("\n\n");
+    double (*t)[N+1][N+1] = malloc(sizeof(double[2][N+1][N+1]));
+    int i, j, iter;
+    #pragma omp parallel for
+    for (i = 0; i <= N; i++)
+     #pragma omp simd
+        for (j = 0; j <= N; j++) {
+            t[0][0][j] = 10;
+            t[1][0][j] = 10;
+            t[0][j][0] = 10;
+            t[1][j][0] = 10;
+            t[0][N][j] = 10;
+            t[1][N][j] = 10;
+            t[0][j][N] = 10;
+            t[1][j][N] = 10;
+        }
+            
+
+    int radstartindex = floor(0.3*N), radendindex = ceil(0.7*N);
+    #pragma omp parallel for
+    for(i=radstartindex; i<=radendindex; i++) {
+        t[0][N][i] = radtemp;
+        t[1][N][i] = radtemp;
+    }
+
+
+    double start = omp_get_wtime();
+    for (iter = 0; iter < LIMIT; iter++) {
+        int t0 = iter%2, t1 = (iter+1)%2;
+        #pragma omp parallel for
+        for (i = 1; i < N; i++){
+            #pragma omp simd
+            for (j = 1; j < N; j++){
+                t[t1][i][j] = 0.25 * (t[t0][i-1][j] + t[t0][i+1][j] + t[t0][i][j-1] + t[t0][i][j+1]);
+        }
+      }
+    }
+    
+    double end = omp_get_wtime();
+    
+    
+    int pointx = floor(N*fracx), pointy = floor(N*fracy);
+    double result = t[(iter+1)%2][pointx][pointy];
+    free(t);
+int res=floor(result);   
+printf(" radtemp is %f\n" , result);
+double tem1 = radtemp;
+if(res == 37){
+	printf("Radiator temperature of %f leads to target temperature at %dx%d of %f\n", radtemp, pointx, pointy, result);
+printf("Computation took %f seconds\n", end-start);
+	}
+else{
+	if (res < 37){
+		tem1 = tem1 + 1;
+		printf("At temp %f", tem1);
+		get_final_temperature(tem1,f_x,f_y);
+	}else if (res > 37){
+		tem1 = tem1 - 1;
+		printf("At temp %f", tem1);
+		get_final_temperature(tem1,f_x,f_y);
+	}
+}
+
+return result;
+}
+
+
+
+int main(void){
+
+int a,b,c;
+printf("N of program \t %d \n LIMIT of program \t %d\n", N, LIMIT);
+
+printf("Inputs are %d %f %f \n",tem ,f_x ,f_y);
+
+get_final_temperature(tem,f_x,f_y);
+	
+}
