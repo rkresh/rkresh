@@ -1,0 +1,153 @@
+# start manager using: ./sbin/start-master.sh
+# start slave using: ./sbin/start-slave.sh spark://comp529-VirtualBox:7077
+# Execute the part1.py code using: ./bin/spark-submit --master local[*] part1.py
+# Part 1 python code on dataset.txt
+# Reshma Kuriachan
+# Id: 201604037
+from pyspark.sql import SQLContext
+from pyspark.sql.types import*
+from pyspark.sql.functions import split
+from pyspark.sql.functions import col, expr, when
+from pyspark.sql.functions import countDistinct
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType,StructField, StringType, IntegerType
+from pyspark.sql.functions import desc,count
+from pyspark.sql.types import StructType, IntegerType, DateType
+from pyspark.sql import functions as F
+from pyspark.sql.functions import col, expr
+import datetime
+import sys, logging
+formatter = logging.Formatter('[%asctime)s] %[(levelname)s @ line %(lineno)d: % 
+(message)s')
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+handler.setFormatter(formatter)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logger.addHandler(handler)
+spark = SparkSession.builder.master("local[*]").getOrCreate();
+spark.sparkContext.setLogLevel("Error")
+# Get the dataset.txt to form th einitial dataframe to work with
+spark = SparkSession.builder.appName("DataFrame").getOrCreate()
+df = spark.read.option("header", "true").option("delimiter", 
+",").option("inferschema", "true").csv("dataset.txt")
+print("The Initial Dataframe given ")
+df.show()
+df=df.drop("AllZero")
+df.printSchema()
+### Q1
+print(" **** Q1: The dataframe modified to Beijing time ")
+df2 = df.withColumn("Date", df["Date"].cast(DateType()))
+df3=df2.withColumn("added_hours",col("Time") + expr("INTERVAL 8 HOURS"))
+df5=df3.withColumn("added_hours", split(col("added_hours"), " ").getItem(1))
+column = when(col("added_hours") < col("Time"), F.date_add(df5['Date'], 
+1)).otherwise(df5.Date)
+df6=df5.withColumn("added_date", column)
+df6 = df6.withColumn("added_Timestamp", col("Timestamp")+0.33333)
+# display the initial dataframe along with the 3 new columns where time, date and 
+timestamp is converted to Beijing time
+df6.show()
+df4=df6.drop("Time")
+df5=df4.drop("Date")
+df5=df5.drop("Timestamp")
+df2=df5.withColumnRenamed("added_hours","Time")
+df6=df2.withColumnRenamed("added_date","Date")
+df6=df6.withColumnRenamed("added_Timestamp","Timestamp")
+# df6 - The dataset to work with is created with updated time, date and timestamp
+df6.show()
+### Q2 
+print(" **** Q2: The number of days the data recorded ")
+df2=df6.select(countDistinct("UserID"))
+ct=df2.head()[0]
+print("Number of unique users")
+# group users based on their ID and Date 
+df=df6.groupby("UserID","Date").count()
+df=df.groupby("UserID").count()
+df.orderBy('UserID', ascending=True).show()
+df0=df.sort(col("count").desc())
+print("The top 5 user IDs and their total number of days ")
+print(df0.show(5))
+### Q 3
+print(" **** Q3: The count for each dates when more than 100 data points recorded 
+")
+df=df6.groupby("UserID","Date").count()
+df0=df.filter(df['count'] > 99)
+df0=df0.withColumnRenamed("count","ct")
+df0.show()
+print("The number of days for each user when more than 100 data points recorded")
+df00=df0.groupby('UserID').count()
+df00.orderBy('UserID', ascending=True).show()
+print("The number of days for each user in ascending order of count")
+df00.orderBy('count', ascending=False).show()
+##Q4
+print(" **** Q4: The highest Altitude users have reached")
+data2 = []
+schema = StructType([ \
+ StructField("Id", IntegerType(), True), \
+StructField("MaxAlt", DoubleType(), True), \
+ StructField("Date", DateType(), True) \
+ ])
+# create a dataframe where the appended values are being stored
+df0 = spark.createDataFrame(data=data2,schema=schema)
+# iterate through all rows and get the max altitude for eah user and min date for 
+the same
+for p in range(100, 130):
+ df7 = df6.filter((df6.UserID==p))
+ q=df7.agg({'Altitude': 'max'})
+ q1=q.head()[0]
+ df8 = df7.filter((df6.Altitude==q1))
+ val=df8.agg({'Date': 'min'})
+ val=val.head()[0]
+ newRow = spark.createDataFrame([(p,q1,val)], schema=schema)
+ appended = df0.union(newRow) # add the newly ceaed row with the existing 
+dataframe
+ df1=appended 
+ df0=df1 # append the old dataframe with newly added row/s
+print("The top 5 highest Altitudes reached by users and the respectve dates ")
+df0=df0.sort(col("MaxAlt").desc())
+print(df0.show(5))
+##Q 5
+print(" **** Q5: The timespan of the observation by users")
+data2 = []
+schema = StructType([ \
+ StructField("id", IntegerType(), True), \
+ StructField("count", DoubleType(), True) \
+ ])
+# ceate dataframe to store appended values
+df0 = spark.createDataFrame(data=data2,schema=schema)
+for p in range(100, 130):
+ df7 = df6.filter((df6.UserID==p))
+ q1=df7.agg({'Timestamp': 'max'})
+ q2=df7.agg({'Timestamp': 'min'})
+ val=q1.head()[0]- q2.head()[0]
+ newRow = spark.createDataFrame([(p,val)], schema=schema)
+ appended = df0.union(newRow) # add the newly ceaed row with the existing 
+dataframe
+ df1=appended
+ df0=df1 # append the old dataframe with newly added row/s
+df0=df0.withColumnRenamed("count","cnt")
+df=df0.sort(col("cnt").desc())
+df.show()
+print("The top 5 observation time by users")
+print(df.show(5))
+### Q6
+print(" **** Q6: The distance travelled by users")
+data2 = []
+schema = StructType([ \
+ StructField("Id", IntegerType(), True), \
+StructField("MaxAlt", DoubleType(), True), \
+ StructField("Date", DateType(), True) \
+ ])
+# create a dataframe where the appended values are being stored
+df0 = spark.createDataFrame(data=data2,schema=schema)
+# iterate through all rows and get the max altitude for eah user and min date for 
+the same
+for p in range(100, 130):
+ df7 = df6.filter((df6.UserID==p))
+ df=df7.groupby("UserID","Date").count()
+ print(df.show(5))
+ df2=df.select(countDistinct("Date"))
+ print("Distinct dates")
+ ct=df2.head()[0]
+ print(ct)
+print("****END****")
